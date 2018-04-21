@@ -1,51 +1,71 @@
-import Html exposing (beginnerProgram, button, div, Html, hr, text)
+module Main exposing (..)
+
+import Html exposing (Html, beginnerProgram, button, div, hr, text)
 import Html.Events exposing (onClick)
 
 
-main: Program Never Model Msg
+main : Program Never Model Msg
 main =
-  beginnerProgram { model = model, view = view, update = update }
-  
+    beginnerProgram { model = model, view = view, update = update }
+
+
 
 -- MODEL
 
-type alias Model = List Int
+
+type alias Model =
+    List Int
+
 
 model : Model
-model = [0, 1, 2]
+model =
+    [ 0, 1, 2 ]
+
 
 
 -- UPDATE
 
-type Msg = Increment Int | Decrement Int
 
-addAtIndex : Int -> Int -> List Int -> List Int
-addAtIndex addend index =
-  List.indexedMap
-     (\i value -> if i == index then value + addend else value ) 
+type Msg
+    = Modify ( Int, Int )
+    | AddNextCounter
+
 
 update : Msg -> Model -> Model
 update msg model =
-  case msg of
-    Increment index ->
-      addAtIndex (1) index model
+    case msg of
+        Modify ( index, amount ) ->
+            List.indexedMap
+                (\i value ->
+                    if i == index then
+                        value + amount
+                    else
+                        value
+                )
+                model
 
-    Decrement index ->
-      addAtIndex (-1) index model
-      
+        AddNextCounter ->
+            0 :: model
+
 
 -- VIEW
+
+
 elementView : Int -> Int -> Html.Html Msg
 elementView index model =
-  div []
-    [ div []
-        [ button [ onClick (Decrement index) ] [ text "-" ]
-        , div [] [ text (toString model) ]
-        , button [ onClick (Increment index) ] [ text "+" ]
+    div []
+        [ div []
+            [ button [ onClick (Modify ( index, -1 )) ] [ text "-" ]
+            , div [] [ text (toString model) ]
+            , button [ onClick (Modify ( index, 1 )) ] [ text "+" ]
+            ]
+        , hr [] []
         ]
-    , hr [] []
-    ]
 
-view : Model -> Html.Html Msg 
+
+view : Model -> Html.Html Msg
 view model =
-  div [] (List.indexedMap elementView model)
+    div []
+        [ div [] (List.indexedMap elementView model)
+        , button [ onClick AddNextCounter ] [ text "Add counter" ]
+        ]
